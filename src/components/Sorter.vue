@@ -112,7 +112,7 @@ function choose(value, ev) {
 		<!-- TITLE -->
 		<v-row justify="center">
 			<v-col cols="12" class="text-center">
-				<h2>{{ props.sorter === "custom" ? "CUSTOM SORTER" : sorterTitle }}</h2>
+				<h2>{{ props.sorter === "custom" ? sorterState.title.toUpperCase() + " SORTER" : sorterTitle.toUpperCase() }}</h2>
 				<p>
 					Choose the option you prefer in each battle.
 					<br />
@@ -129,9 +129,9 @@ function choose(value, ev) {
 			</v-col>
 		</v-row>
 		<!-- ITEM BUTTONS -->
-		<v-row v-if="!sorterState.finished" class="sorter" justify="center" style="height: 20%" align="stretch">
+		<v-row v-if="!sorterState.finished" class="sorter" justify="center" align="stretch">
 			<v-col cols="4">
-				<v-btn class="sorter-button w-100 h-100" @click="choose(-1, $event)">
+				<v-btn class="sorter-button full-size-btn pa-8" @click="choose(-1, $event)">
 					{{ leftItem }}
 				</v-btn>
 			</v-col>
@@ -140,20 +140,20 @@ function choose(value, ev) {
 				<v-btn class="flex-grow-1" @click="choose(0, $event)">No opinion</v-btn>
 			</v-col>
 			<v-col cols="4">
-				<v-btn class="sorter-button w-100 h-100" @click="choose(1, $event)">
+				<v-btn class="sorter-button full-size-btn pa-8" @click="choose(1, $event)">
 					{{ rightItem }}
 				</v-btn>
 			</v-col>
 		</v-row>
 		<!-- RESULTS TABLE -->
 		<v-row v-else justify="center">
-			<v-col cols="8" sm="8" md="6" lg="6" class="text-center">
+			<v-col cols="8" class="text-center">
 				<p>Your ranking has been generated.</p>
-				<v-table striped="even">
+				<v-table class="ranking-table" striped="even">
 					<tbody>
 						<tr v-for="item in sorterState.ranking" :key="item.position">
-							<td class="text-right" style="width: 80px"># {{ item.position }}</td>
-							<td class="text-center">{{ item.name }}</td>
+							<td class="text-right"># {{ item.position }}</td>
+							<td class="text-center py-4">{{ item.name }}</td>
 						</tr>
 					</tbody>
 				</v-table>
@@ -163,9 +163,18 @@ function choose(value, ev) {
 	</v-container>
 </template>
 
-<style lang="css">
-.sorter-button .v-btn__content {
-	white-space: normal;
-	overflow-wrap: anywhere;
+<style scoped>
+/* Keeps table full width and lets columns size naturally */
+.ranking-table table {
+	width: 100%;
+	table-layout: auto;
+}
+
+/* Keeps rank number on one line and aligns it right */
+.ranking-table .rank-index,
+.ranking-table td:first-child {
+	white-space: nowrap;
+	padding-right: 12px;
+	text-align: right;
 }
 </style>

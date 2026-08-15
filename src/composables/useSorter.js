@@ -1,144 +1,168 @@
 import { reactive } from "vue";
 
 const initialState = {
-  title: "",
+	customSorterTitle: "", // Title of the custom sorter
 
-  sortingItems: [],
-  lists: [],
-  parents: [],
-  equals: [],
-  results: [],
+	sortingItems: [], // Original items to sort
+	lists: [], // Lists created while splitting the items
+	parents: [], // Stores which list created each smaller list
+	equals: [], // Stores items considered equal by the user
+	results: [], // Temporary list used while merging items
 
-  leftIndex: 0,
-  rightIndex: 0,
+	leftIndex: 0, // Current position in the left list
+	rightIndex: 0, // Current position in the right list
 
-  currentLeftList: 0,
-  currentRightList: 0,
+	currentLeftList: 0, // Index of the current left list being compared
+	currentRightList: 0, // Index of the current right list being compared
 
-  question: 1,
+	question: 1, // Current battle number
 
-  totalSize: 0,
-  finishedSize: 0,
+	totalSize: 0, // Total number of comparisons needed
+	finishedSize: 0, // Number of comparisons already completed
 
-  finished: false,
+	finished: false, // Indicates whether sorting has finish
 
-  ranking: [],
+	ranking: [], // Final sorted ranking
 };
 
+// Creates and manages the state and actions of the sorter
 export function useSorter() {
-  const state = reactive({ ...initialState });
+	const state = reactive({ ...initialState });
 
-  function reset() {
-    Object.assign(state, structuredClone(initialState));
-  }
+	// Resets the sorter back to its initial state
+	function reset() {
+		Object.assign(state, structuredClone(initialState));
+	}
 
-  function shuffle(items) {
-    const shuffled = [...items];
+	// Returns a randomly shuffled copy of an array
+	function shuffle(items) {
+		const shuffled = [...items];
 
-    for (let i = shuffled.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-    }
+		for (let i = shuffled.length - 1; i > 0; i--) {
+			const j = Math.floor(Math.random() * (i + 1));
+			[shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+		}
 
-    return shuffled;
-  }
+		return shuffled;
+	}
 
-  function initSorter(sorter) {
-    reset();
+	// Starts a sorter using the given sorter data
+	// Prepares shuffled items, splits lists for the merge process, and sets counters
+	function initSorter(sorter) {
+		reset();
 
-    state.title = sorter.title;
-    state.sortingItems = shuffle(sorter.items);
-    state.lists = [state.sortingItems.map((_, index) => index)];
-    state.parents = [-1];
+		state.title = sorter.title;
+		state.sortingItems = shuffle(sorter.items);
+		state.lists = [state.sortingItems.map((_, index) => index)];
+		state.parents = [-1];
 
-    for (let i = 0; i < state.lists.length; i++) {
-      const list = state.lists[i];
+		for (let i = 0; i < state.lists.length; i++) {
+			const list = state.lists[i];
 
-      if (list.length < 2) continue;
+			if (list.length < 2) continue;
 
-      const middle = Math.ceil(list.length / 2);
+			const middle = Math.ceil(list.length / 2);
 
-      state.lists.push(list.slice(0, middle), list.slice(middle));
-      state.totalSize += list.length;
-      state.parents.push(i, i);
-    }
+			state.lists.push(list.slice(0, middle), list.slice(middle));
+			state.totalSize += list.length;
+			state.parents.push(i, i);
+		}
 
-    state.equals = Array(state.sortingItems.length).fill(-1);
-    state.currentLeftList = state.lists.length - 2;
-    state.currentRightList = state.lists.length - 1;
-  }
+		state.equals = Array(state.sortingItems.length).fill(-1);
+		state.currentLeftList = state.lists.length - 2;
+		state.currentRightList = state.lists.length - 1;
+	}
 
-  function initCustomSorter(title, items) {
-    initSorter({ id: "custom", title: title || "Custom Sorter", items });
-  }
+	// Initializes a custom sorter using a user-provided title and items
+	function initCustomSorter(title, items) {
+		initSorter({
+			id: "custom",
+			title: title,
+			items,
+		});
+	}
 
-  function choose(value) {
-    if (state.finished) return;
+	// Handles the user's choice during a comparison
+	// value < 0 -> left item wins
+	// value > 0 -> right item wins
+	// value === 0 -> both items are considered equal
+	function choose(value) {
+		if (state.finished) return;
 
-    const leftList = state.lists[state.currentLeftList];
-    const rightList = state.lists[state.currentRightList];
+		const leftList = state.lists[state.currentLeftList];
+		const rightList = state.lists[state.currentRightList];
 
-    if (value < 0) {
-      state.results.push(leftList[state.leftIndex++]);
-    } else if (value > 0) {
-      state.results.push(rightList[state.rightIndex++]);
-    } else {
-      const left = leftList[state.leftIndex++];
-      const right = rightList[state.rightIndex++];
+		if (value < 0) {
+			state.results.push(leftList[state.leftIndex++]);
+		} else if (value > 0) {
+			state.results.push(rightList[state.rightIndex++]);
+		} else {
+			const left = leftList[state.leftIndex++];
+			const right = rightList[state.rightIndex++];
 
-      state.results.push(left, right);
-      state.equals[left] = right;
+			state.results.push(left, right);
+			state.equals[left] = right;
 
-      state.finishedSize++;
-    }
+			state.finishedSize++;
+		}
 
-    state.finishedSize++;
+		state.finishedSize++;
 
-    mergeRemaining();
+		mergeRemaining();
 
-    state.question++;
-  }
+		state.question++;
+	}
 
-  function mergeRemaining() {
-    const left = state.lists[state.currentLeftList];
-    const right = state.lists[state.currentRightList];
+	// Completes a merge when one of the lists has no remaining items
+	function mergeRemaining() {
+		const left = state.lists[state.currentLeftList];
+		const right = state.lists[state.currentRightList];
 
-    while (state.leftIndex < left.length && state.rightIndex === right.length) {
-      state.results.push(left[state.leftIndex++]);
-      state.finishedSize++;
-    }
+		while (state.leftIndex < left.length && state.rightIndex === right.length) {
+			state.results.push(left[state.leftIndex++]);
+			state.finishedSize++;
+		}
 
-    while (state.rightIndex < right.length && state.leftIndex === left.length) {
-      state.results.push(right[state.rightIndex++]);
-      state.finishedSize++;
-    }
+		while (state.rightIndex < right.length && state.leftIndex === left.length) {
+			state.results.push(right[state.rightIndex++]);
+			state.finishedSize++;
+		}
 
-    if (state.leftIndex !== left.length || state.rightIndex !== right.length) return;
+		if (state.leftIndex !== left.length || state.rightIndex !== right.length) return;
 
-    const parent = state.parents[state.currentLeftList];
+		const parent = state.parents[state.currentLeftList];
 
-    state.lists[parent] = [...state.results];
-    state.lists.splice(-2);
+		state.lists[parent] = [...state.results];
+		state.lists.splice(-2);
 
-    state.currentLeftList -= 2;
-    state.currentRightList -= 2;
+		state.currentLeftList -= 2;
+		state.currentRightList -= 2;
 
-    state.results = [];
-    state.leftIndex = 0;
-    state.rightIndex = 0;
+		state.results = [];
+		state.leftIndex = 0;
+		state.rightIndex = 0;
 
-    if (state.currentLeftList < 0) finish();
-  }
+		if (state.currentLeftList < 0) finish();
+	}
 
-  function finish() {
-    state.finished = true;
+	// Generates the final ranking after sorting is completed
+	function finish() {
+		state.finished = true;
 
-    state.ranking = state.lists[0].map((item, index) => ({ position: index + 1, name: state.sortingItems[item] }));
-  }
+		state.ranking = state.lists[0].map((item, index) => ({ position: index + 1, name: state.sortingItems[item] }));
+	}
 
-  function progress() {
-    return state.totalSize ? Math.floor((state.finishedSize * 100) / state.totalSize) : 0;
-  }
+	// Calculates sorting progress percentage
+	function progress() {
+		return state.totalSize ? Math.floor((state.finishedSize * 100) / state.totalSize) : 0;
+	}
 
-  return { state, initSorter, initCustomSorter, choose, progress };
+	// Makes the state and these functions available to Vue components
+	return {
+		state,
+		initSorter,
+		initCustomSorter,
+		choose,
+		progress,
+	};
 }

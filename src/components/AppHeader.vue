@@ -30,7 +30,7 @@ const drawer = ref(false);
 								<v-img :src="artist.icon" />
 							</v-avatar>
 						</template>
-						<span>{{ artist.name }}</span>
+						<span class="text-wrap">{{ artist.name }}</span>
 					</v-list-item>
 				</template>
 				<v-list-item title="Songs" prepend-icon="mdi-music" :to="`/${artist.id}/songs`" />

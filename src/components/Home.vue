@@ -18,7 +18,7 @@ import { artists } from "@/data/artists.js";
 				<v-btn variant="plain" width="100" height="100" icon :to="{ path: artist.id }">
 					<v-avatar size="100" :image="artist.icon" />
 				</v-btn>
-				<p>{{ artist.name }}</p>
+				<p class="text-wrap">{{ artist.name }}</p>
 			</v-col>
 		</v-row>
 		<v-divider class="my-8">OR</v-divider>

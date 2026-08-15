@@ -24,7 +24,7 @@ const albumDialog = ref(false);
 		<!-- TITLE -->
 		<v-row justify="center">
 			<v-col cols="12" class="text-center">
-				<h2>{{ artist.data.title }}</h2>
+				<h2>{{ artist.data.title.toUpperCase() }} SORTER</h2>
 				<p>What do you want to sort?</p>
 			</v-col>
 		</v-row>
@@ -59,7 +59,7 @@ const albumDialog = ref(false);
 							<v-btn icon variant="plain" width="80" height="80" :to="`/${artist.id}/albums/${album.id}`" @click="albumDialog = false">
 								<v-avatar size="80" :image="album.icon" />
 							</v-btn>
-							<p>{{ album.name }}</p>
+							<p class="text-wrap">{{ album.name }}</p>
 						</v-col>
 					</v-row>
 				</v-card-text>

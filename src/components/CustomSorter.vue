@@ -1,5 +1,5 @@
 <script setup>
-import { ref, inject } from "vue";
+import { ref, inject, nextTick } from "vue";
 import { useRouter } from "vue-router";
 
 // Gets the router instance to navigate between pages
@@ -7,6 +7,9 @@ const router = useRouter();
 
 // Stores the current input text
 const input = ref("");
+
+// Gets the reference to the input field for focusing it after adding an item
+const itemInput = ref(null);
 
 // Stores all items added by the user
 const items = ref([]);
@@ -24,7 +27,23 @@ function addItem() {
 	if (!value) return;
 
 	items.value.push(value);
-	input.value = ""; // Clears the input after adding the item
+	input.value = "";
+
+	// Focuses the input field after adding an item
+	nextTick(() => {
+		if (!itemInput.value) return;
+
+		if (typeof itemInput.value.focus === "function") {
+			itemInput.value.focus();
+			return;
+		}
+
+		const el = itemInput.value.$el || itemInput.value;
+		if (el && el.querySelector) {
+			const native = el.querySelector('input, textarea');
+			if (native && typeof native.focus === 'function') native.focus();
+		}
+	});
 }
 
 // Removes an item from the list using its position
@@ -47,7 +66,7 @@ function done() {
 		<!-- TITLE -->
 		<v-row justify="center">
 			<v-col cols="8" class="text-center">
-				<h1>CUSTOM SORTER</h1>
+				<h2>CUSTOM SORTER</h2>
 				<p>Create your own ranking by adding the options you want to compare.</p>
 			</v-col>
 		</v-row>
@@ -60,10 +79,10 @@ function done() {
 		<!-- ITEM INPUT FIELD -->
 		<v-row justify="center">
 			<v-col cols="8">
-				<v-text-field v-model="input" label="Add an item" variant="outlined" clearable hide-details @keyup.enter="addItem" />
+				<v-text-field ref="itemInput" v-model="input" label="Add an item" variant="outlined" clearable hide-details @keyup.enter="addItem" />
 			</v-col>
 			<v-col cols="2">
-				<v-btn class="h-100 w-100" @click="addItem">Add</v-btn>
+				<v-btn class="full-size-btn" @click="addItem">Add</v-btn>
 			</v-col>
 		</v-row>
 		<v-row v-if="items.length" justify="center">
@@ -74,7 +93,7 @@ function done() {
 		<v-row justify="center" v-show="items.length > 0">
 			<v-col cols="8">
 				<v-list>
-					<v-list-item v-for="(item, index) in items" :key="index">
+					<v-list-item class="text-wrap" v-for="(item, index) in items" :key="index">
 						{{ item }}
 						<template #append>
 							<v-btn variant="text" icon="mdi-delete" @click="removeItem(index)"> </v-btn>
