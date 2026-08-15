@@ -1,38 +1,58 @@
 # Sorter
 
-This template should help get you started developing with Vue 3 in Vite.
+A simple web app for creating rankings by comparing two items at a time.
 
-## Recommended IDE Setup
+Choose an artist and sort their songs, albums, or the songs from a specific album. You can also create your own custom sorter with any list of items.
 
-[VS Code](https://code.visualstudio.com/) + [Vue (Official)](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
+## Features
 
-## Recommended Browser Setup
+- Sort an artist's songs
+- Sort an artist's albums
+- Sort the songs from a specific album
+- Create custom sorters with your own items
+- Compare two items at a time
+- Mark two items as equal or choose "No opinion"
+- Generate a final ranking based on your choices
+- Supports multiple artists and their own music data
 
-- Chromium-based browsers (Chrome, Edge, Brave, etc.):
-    - [Vue.js devtools](https://chromewebstore.google.com/detail/vuejs-devtools/nhdogjmejiglipccpnnnanhbledajbpd)
-    - [Turn on Custom Object Formatter in Chrome DevTools](http://bit.ly/object-formatters)
-- Firefox:
-    - [Vue.js devtools](https://addons.mozilla.org/en-US/firefox/addon/vue-js-devtools/)
-    - [Turn on Custom Object Formatter in Firefox DevTools](https://fxdx.dev/firefox-devtools-custom-object-formatters/)
+## How it works
 
-## Customize configuration
+The sorter presents two items at a time. Choose the one you prefer, or select an option when you don't have a preference.
 
-See [Vite Configuration Reference](https://vite.dev/config/).
+The app uses your choices to progressively build a ranking of all the items.
 
-## Project Setup
+## Artists
 
-```sh
+Currently supported:
+
+- Katarsis
+- Aklì
+
+More artists can be added by adding their data to the project.
+
+## Tech Stack
+
+- Vue 3
+- Vite
+- Vue Router
+- Vuetify
+
+## Running locally
+
+Install the dependencies:
+
+```bash
 npm install
 ```
 
-### Compile and Hot-Reload for Development
+Start the development server:
 
-```sh
+```bash
 npm run dev
 ```
 
-### Compile and Minify for Production
+Then open the local URL shown by Vite in your browser.
 
-```sh
-npm run build
-```
+## Notes
+
+This is a personal project made for sharing with friends. It is not intended to be a public music database or a commercial application.
